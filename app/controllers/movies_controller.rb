@@ -18,6 +18,7 @@ class MoviesController < ApplicationController
     @all_ratings = Movie.get_ratings
     @sortBy = params[:sortParams]
     @ratingBy = params[:ratings]? params[:ratings] : Hash.new
+    
   end
 
   def new
