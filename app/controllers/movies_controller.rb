@@ -11,14 +11,55 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all.order(params[:sortParams])
+    #************Part2************#
+    # @movies = Movie.all.order(params[:sortParams])
+    # if params[:ratings]
+    #   @movies = Movie.where(:rating => params[:ratings].keys).order(params[:sortParams])
+    # end
+    # @all_ratings = Movie.get_ratings
+    # @sortBy = params[:sortParams]
+    # @ratingBy = params[:ratings]? params[:ratings] : Hash.new
+    
+    #************Part3************#
+    if params[:sortParams]
+      @sortBy = params[:sortParams]
+      session[:sortParams] = params[:sortParams]
+    elsif session[:sortParams]
+      @sortBy = session[:sortParams]
+      redirect = true
+    else
+      @sortBy = nil
+      session[:sortParams] = nil
+    end
+
     if params[:ratings]
-      @movies = Movie.where(:rating => params[:ratings].keys).order(params[:sortParams])
+      @ratingBy = params[:ratings]
+      session[:ratings] = params[:ratings]
+    elsif session[:ratings]
+      if params[:commit] == "Refresh"
+        @ratingBy = nil
+        session[:ratings] = nil
+      else
+        @ratingBy = session[:ratings]
+        redirect = true
+      end
+    else
+      @ratingBy = nil
+      session[:ratings] = nil
+    end
+    
+    if redirect
+      flash.keep
+      redirect_to movies_path :sortParams => @sortBy, :ratings => @ratingBy
+    end
+    
+    @movies = Movie.all.order(@sortBy)
+    if params[:ratings]
+      @movies = Movie.where(:rating => @ratingBy.keys).order(@sortBy)
     end
     @all_ratings = Movie.get_ratings
     @sortBy = params[:sortParams]
     @ratingBy = params[:ratings]? params[:ratings] : Hash.new
-    
   end
 
   def new
